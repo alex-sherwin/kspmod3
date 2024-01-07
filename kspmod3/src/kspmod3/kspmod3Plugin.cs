@@ -1,6 +1,7 @@
 using BepInEx;
 using HarmonyLib;
 using JetBrains.Annotations;
+using KSP.Game;
 using KSP.UI.Binding;
 using SpaceWarp;
 using SpaceWarp.API.Assets;
@@ -10,6 +11,9 @@ using SpaceWarp.API.Game.Extensions;
 using SpaceWarp.API.UI;
 using SpaceWarp.API.UI.Appbar;
 using UnityEngine;
+using KSP.Sim.impl;
+using KSP.Sim;
+
 
 namespace kspmod3;
 
@@ -117,7 +121,7 @@ public class kspmod3Plugin : BaseSpaceWarpPlugin
                 FillWindow,
                 "",
                 GUILayout.Height(350),
-                GUILayout.Width(350)
+                GUILayout.Width(700)
             );
         }
     }
@@ -128,7 +132,26 @@ public class kspmod3Plugin : BaseSpaceWarpPlugin
     /// <param name="windowID"></param>
     private static void FillWindow(int windowID)
     {
-        GUILayout.Label(" - ");
+        var vesselComponent = GameManager.Instance?.Game?.ViewController?.GetActiveVehicle(true)?.GetSimVessel(true);
+
+        var vesselComponentName = vesselComponent?.Name ?? "default name";
+        
+        var label = $"vessel: {vesselComponentName} ";
+        
+        IEnumerable<PartComponent> parts = vesselComponent.SimulationObject?.PartOwner?.Parts;
+
+        if (parts != null)
+        {
+            foreach (var part in parts)
+            {
+             
+                label += $"\n{part.Name}: {part.Temperature} (max: {part.MaxTemp})";
+
+            }
+        }
+        
+        
+        GUILayout.Label(label);
         GUI.DragWindow(new Rect(0, 0, 10000, 500));
     }
 }
